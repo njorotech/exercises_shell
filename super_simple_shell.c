@@ -20,15 +20,22 @@ int main(void)
 
 		readbytes = getline(&buf, &n, stdin);
 
-		if (readbytes == -1)
+		if (readbytes == -1 || readbytes == EOF)
 		{
 			perror("Error:");
 			free(buf);
 			return (1);
 		}
 
+		/* Remove trailing newline character from user input */
+		if (buf[readbytes - 1] == '\n')
+		{
+			buf[readbytes - 1] = '\0';
+		}
+
 		argv = malloc(sizeof(char *) * 2);
 		argv[0] = malloc(sizeof(char ) * (strlen(buf) + 1));
+		strcpy(argv[0], buf);
 		argv[1] = NULL;
 
 		child_pid = fork();
@@ -44,15 +51,16 @@ int main(void)
 			if (execve(argv[0], argv, NULL) == -1)
 			{
 				perror("Error:");
+				exit(1);
 			}
 		}
 		else
 		{
 			wait(&status);
 		}
-		free(buf);
-		free(argv);
 		free(argv[0]);
+		free(argv);
+		free(buf);
 	}
 	return (0);
 }
